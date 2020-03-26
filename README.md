@@ -12,30 +12,18 @@
 * History log。
 
 ## 截图:
-<img src="https://github.com/HuberTRoy/MusicPlayer/blob/master/testpic/24.jpg"/>
+<img src="https://github.com/quan12jiale/MySpyder/blob/master/screenshot1.png"/>
 
 ### 安装:
 ```
-$ (sudo) pip install Music-Player
-✨🍰✨
-```
-或
-```
-$ git clone git@github.com:HuberTRoy/MusicBox.git
-$ (sudo) python(3) setup.py install
+$ git clone git@github.com/quan12jiale/MySpyder.git
 ```
 
 ### 运行:
 ```
-$ (sudo) musicplayer
+用Qt creator打开相应的pro项目文件，开发环境是Qt creator 12.0 mingw
 ```
 
 #### 功能TODO:
 - [ ] IPython console.
 - [ ] Variable explorer.
-- [ ] 打包下载方便食用.
-- [ ] 多平台账号同步歌单.
-- [ ] 方便的界面皮肤更换.
-- [x] 支持下载歌曲.
-- [x] 简略推荐歌曲.
-- [x] 桌面歌词系统.
