@@ -393,7 +393,7 @@ bool FindReplace::find(bool changed, bool forward, bool rehighlight,
         bool words = this->words_button->isChecked();
         bool regexp = this->re_button->isChecked();
         bool found = editor->find_text(text, changed, forward,
-                                            _case, words, regexp);
+                                       _case, words, regexp);
         QString stylesheet = this->STYLE[found];
         QString tooltip = this->TOOLTIP[found];
         if (!found && regexp) {

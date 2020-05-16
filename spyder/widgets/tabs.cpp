@@ -139,6 +139,7 @@ void TabBar::dropEvent(QDropEvent *event)
 
 void TabBar::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    // 双击ipythonconsole的tabbar会出现tab_name_editor
     if (rename_tabs && event->buttons() == Qt::MouseButtons(Qt::LeftButton)) {
         int index = tabAt(event->pos());
         if (index >= 0)

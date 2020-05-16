@@ -49,7 +49,7 @@ void TabFilter::_fix_cursor(int from_index, int to_index)
     QCursor cursor;
     QPoint pos = this->dock_tabbar->mapFromGlobal(cursor.pos());
     int x = pos.x(), y = pos.y();
-    if (x < tab_x_min || x < tab_x_max) {
+    if (x < tab_x_min || x > tab_x_max) {
         QPoint new_pos = dock_tabbar->mapToGlobal(QPoint(x+delta, y));
         cursor.setPos(new_pos);
     }
@@ -445,8 +445,11 @@ void SpyderPluginWidget::create_toggle_view_action()
     QAction* action = new QAction(title, this);
     connect(action, &QAction::toggled, [this](bool checked){this->toggle_view(checked);});
     action->setCheckable(true);// 得加上这句，才可以选中
-    action->setShortcut(QKeySequence(this->shortcut));
-    action->setShortcutContext(Qt::WidgetShortcut);
+    if (!this->shortcut.isEmpty()) {
+        action->setShortcut(QKeySequence(this->shortcut));
+        action->setShortcutContext(Qt::WidgetShortcut);
+    }
+
     this->toggle_view_action = action;
 }
 

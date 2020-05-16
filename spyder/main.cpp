@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 {
     registe_meta_type();
     QApplication a(argc, argv);
-    read_default_to_settings();
+    //read_default_to_settings();
     initialize();
 
     MainWindow* win = new MainWindow;

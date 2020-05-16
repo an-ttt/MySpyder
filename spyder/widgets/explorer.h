@@ -6,7 +6,7 @@
 #include "utils/programs.h"
 #include "utils/qthelpers.h"
 #include <QtWidgets>
-#include <QAbstractItemModel>
+
 
 // 供editor.cpp调用
 void show_in_external_file_explorer(const QStringList& fnames = QStringList());

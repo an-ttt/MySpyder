@@ -2,6 +2,7 @@
 #include "widgets/projects/projects_explorer.h"
 #include "plugins/plugins_explorer.h"
 
+
 void open_file_in_external_explorer(QString filename)
 {
     QFileInfo info(filename);

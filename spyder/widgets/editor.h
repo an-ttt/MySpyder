@@ -404,7 +404,7 @@ public slots:
     void __check_file_status(int index);
     void __modify_stack_title();
     void refresh(int index = -1);
-    void modification_changed(int state=-1,int index=-1,size_t editor_id=0);
+    void modification_changed(int state=-1,int index=-2,size_t editor_id=0);
     void refresh_eol_chars(const QString& eol_chars);
 
     void reload(int index);
@@ -432,14 +432,6 @@ protected:
     void dropEvent(QDropEvent *event);
 };
 
-class Register_Editorstack_cb // Editor也需要继承这个类
-{
-public:
-    virtual void register_editorstack(EditorStack* editorstack) = 0;
-    virtual bool unregister_editorstack(EditorStack* editorstack) = 0;
-};
-
-//typedef void (Register_Editorstack_cb::*Register_Fun)(EditorStack*);
 
 class EditorSplitter : public QSplitter
 {
@@ -450,9 +442,8 @@ public:
 
     Editor* plugin;
 
-    //这里可以不用函数指针
-    Register_Editorstack_cb* register_editorstack_cb;
-    Register_Editorstack_cb* unregister_editorstack_cb;
+    std::function<void(EditorStack*)> register_editorstack_cb;
+    std::function<bool(EditorStack*)> unregister_editorstack_cb;
 
     QList<QAction*> menu_actions;
     EditorStack* editorstack;
@@ -460,8 +451,8 @@ public:
 public:
     EditorSplitter(QWidget* parent,Editor* plugin,
                    const QList<QAction*>& menu_actions,bool first=false,
-                   Register_Editorstack_cb* register_editorstack_cb=nullptr,
-                   Register_Editorstack_cb* unregister_editorstack_cb=nullptr);
+                   std::function<void(EditorStack*)> register_editorstack_cb=nullptr,
+                   std::function<bool(EditorStack*)> unregister_editorstack_cb=nullptr);
     void __give_focus_to_remaining_editor();
     void split(Qt::Orientation orientation=Qt::Vertical);
     QList<QPair<EditorStack*, Qt::Orientation>> iter_editorstacks();
@@ -474,7 +465,7 @@ public slots:
 };
 
 
-class EditorWidget : public QSplitter, public Register_Editorstack_cb
+class EditorWidget : public QSplitter
 {
     Q_OBJECT
 public:

@@ -290,7 +290,7 @@ public:
     int compute_linenumberarea_width();
 
     void linenumberarea_paint_event(QPaintEvent* event);
-    void draw_pixmap(int ytop,const QPixmap& pixmap,QPainter* painter,int font_height);
+    //void draw_pixmap(int ytop,const QPixmap& pixmap,QPainter* painter,int font_height);
     int __get_linenumber_from_mouse_event(QMouseEvent* event);
     void linenumberarea_mousemove_event(QMouseEvent* event);
     void linenumberarea_mousedoubleclick_event(QMouseEvent* event);
@@ -338,7 +338,7 @@ public:
     void exec_gotolinedialog();
     void cleanup_code_analysis();
     void process_code_analysis(const QList<QList<QVariant>>& check_results);
-    bool is_line_splitted(int line_no,QTextDocument* document);
+    //bool is_line_splitted(int line_no,QTextDocument* document);
     void __show_code_analysis_results(int line_number,const QList<QPair<QString,bool>>& code_analysis);
     int go_to_next_warning();
     int go_to_previous_warning();
@@ -362,11 +362,6 @@ public:
     void comment();
     void uncomment();
     QString __blockcomment_bar();
-
-
-    bool __is_comment_bar(const QTextCursor& cursor);
-    bool __in_block_comment(const QTextCursor& cursor);
-
 
     QTextCursor _get_word_start_cursor(int position);
     QTextCursor _get_word_end_cursor(int position);
@@ -402,7 +397,7 @@ public:
     bool is_editor();
 
 public slots:
-    void cb_maker(const QString& attr);
+    void cb_maker(int attr);
     void update_linenumberarea_width(int new_block_count=-1);
     void update_linenumberarea(const QRect& qrect,int dy);
     void __cursor_position_changed();

@@ -12,7 +12,7 @@ public:
     QString toolTip() const;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
-public:
+private:
     QString _tip_text;
 };
 
@@ -48,7 +48,7 @@ public:
 class IconLineEdit : public QLineEdit
 {
     Q_OBJECT
-public:
+private:
     bool _status;
     bool _status_set;
     QIcon _valid_icon;

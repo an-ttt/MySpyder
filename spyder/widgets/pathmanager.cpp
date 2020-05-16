@@ -269,7 +269,7 @@ void PathManager::add_path()
 static void test()
 {
     //无bug，只有synchronize()槽函数未真正实现，需要对winreg.h(Windows注册表)头文件中的函数比较熟悉
-    QStringList pathlist = {"F:/MyPython/spyder/widgets", "D:/Anaconda3/python37.zip"};
+    QStringList pathlist = {"F:/python/spyder/widgets", "D:/Anaconda3/python37.zip"};
     QStringList ro_pathlist = {"D:/Anaconda3/DLLs", "D:/Anaconda3/lib", "D:/Anaconda3", "", "D:/Anaconda3/lib/site-packages",
                               "D:/Anaconda3/lib/site-packages/win32", "D:/Anaconda3/lib/site-packages/win32/lib",
                               "D:/Anaconda3/lib/site-packages/Pythonwin", "D:/Anaconda3/lib/site-packages/TPython/extensions",

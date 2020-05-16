@@ -92,10 +92,10 @@ QString get_primary_at(const QString& source_code,int offset,bool retry)
 {
     QString obj = "";
     QStringList left = source_code.left(offset).split(QRegularExpression("[^0-9a-zA-Z_.]"));
-    if (!left.empty() && !left.last().isEmpty())
+    if (!left.isEmpty() && !left.last().isEmpty())
         obj = left.last();
     QStringList right = source_code.mid(offset).split(QRegularExpression("\\W"));
-    if (!right.empty() && !right.first().isEmpty())
+    if (!right.isEmpty() && !right.first().isEmpty())
         obj += right.first();
     if (!obj.isEmpty() && obj[0].isDigit())
         obj = "";

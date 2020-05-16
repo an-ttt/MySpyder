@@ -228,3 +228,16 @@ void IconLineEdit::paintEvent(QPaintEvent *event)
         this->_refresh();
     }
 }
+
+
+void test_msgcheckbox()
+{
+    MessageCheckBox box;
+    box.setWindowTitle("Spyder updates");
+    box.setText("Testing checkbox");
+    box.set_checkbox_text("Check for updates on startup?");
+    box.setStandardButtons(QMessageBox::Ok);
+    box.setDefaultButton(QMessageBox::Ok);
+    box.setIcon(QMessageBox::Information);
+    box.exec();
+}

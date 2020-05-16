@@ -16,7 +16,7 @@
 
 class Projects;
 
-class Editor : public SpyderPluginWidget, public Register_Editorstack_cb //该类位于plugins.h
+class Editor : public SpyderPluginWidget //该类位于plugins.h
 {
     Q_OBJECT
 signals:

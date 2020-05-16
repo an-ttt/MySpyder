@@ -217,7 +217,7 @@ static QList<QTreeWidgetItem*> get_item_children(QTreeWidgetItem* item)
     QList<QTreeWidgetItem*> copy = children;
     foreach (QTreeWidgetItem* child, copy) {
         QList<QTreeWidgetItem*> others = get_item_children(child);
-        if (!others.empty())
+        if (!others.isEmpty())
             children.append(others);
     }
 

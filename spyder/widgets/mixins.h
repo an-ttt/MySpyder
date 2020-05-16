@@ -34,7 +34,7 @@ public:
     void show_calltip(const QString& title,QStringList text,bool signature=false,
                       const QString& color="#2D62FF",int at_line=-1,int at_position=-1);
     void show_calltip(const QString& title,QString text,bool signature=false,
-                      const QString& color="#2D62FF",int at_line=0,int at_position=0);
+                      const QString& color="#2D62FF",int at_line=-1,int at_position=-1);
 
     void set_eol_chars(const QString& text);
     QString get_line_separator() const;
@@ -158,7 +158,7 @@ template <typename T>
 void BaseEditMixin<T>::show_calltip(const QString &title, QStringList text, bool signature,
                                  const QString &color, int at_line, int at_position)
 {
-    if (text.empty())
+    if (text.isEmpty())
         return;
 
     if (at_position == -1)
@@ -531,7 +531,7 @@ QString BaseEditMixin<T>::get_text(const QString& position_from,
             text.chop(1);
         // TODO源码是while text.endswith(u"\u2029"):
         //              text = text[:-1]
-        while (text.endsWith("\u2029"))
+        while (text.endsWith(QChar(QChar::ParagraphSeparator)))
             text.chop(1);
     }
     return text;
@@ -548,7 +548,7 @@ QString BaseEditMixin<T>::get_text(const QString& position_from,
             text.chop(1);
         // TODO源码是while text.endswith(u"\u2029"):
         //              text = text[:-1]
-        while (text.endsWith("\u2029"))
+        while (text.endsWith(QChar(QChar::ParagraphSeparator)))
             text.chop(1);
     }
     return text;
@@ -565,7 +565,7 @@ QString BaseEditMixin<T>::get_text(int position_from,
             text.chop(1);
         // TODO源码是while text.endswith(u"\u2029"):
         //              text = text[:-1]
-        while (text.endsWith("\u2029"))
+        while (text.endsWith(QChar(QChar::ParagraphSeparator)))
             text.chop(1);
     }
     return text;
@@ -582,7 +582,7 @@ QString BaseEditMixin<T>::get_text(int position_from,
             text.chop(1);
         // TODO源码是while text.endswith(u"\u2029"):
         //              text = text[:-1]
-        while (text.endsWith("\u2029"))
+        while (text.endsWith(QChar(QChar::ParagraphSeparator)))
             text.chop(1);
     }
     return text;
@@ -760,7 +760,7 @@ QString BaseEditMixin<T>::get_line_at(const QPoint &coordinates)
 {
     QTextCursor cursor = this->cursorForPosition(coordinates);
     cursor.select(QTextCursor::BlockUnderCursor);
-    return cursor.selectedText().replace("\u2029","");
+    return cursor.selectedText().replace(QChar(QChar::ParagraphSeparator),"");
 }
 
 template <typename T>
@@ -806,8 +806,8 @@ bool BaseEditMixin<T>::has_selected_text()
 template <typename T>
 QString BaseEditMixin<T>::get_selected_text()
 {
-    // \u2029是unicode编码的段落分割符
-    return this->textCursor().selectedText().replace("\u2029",
+    // \u2029是unicode编码的段落分割符 ParagraphSeparator = 0x2029
+    return this->textCursor().selectedText().replace(QChar(QChar::ParagraphSeparator),
                                                      this->get_line_separator());
 }
 

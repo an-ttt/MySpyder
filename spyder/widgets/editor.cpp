@@ -207,13 +207,12 @@ void ThreadManager::update_queue()
                 still_running.append(thread);
                 started += 1;
             }
-
-            //threadlist = None 这句在c++中应该没用
-            if (!still_running.isEmpty())
-                this->started_threads[parent_id] = still_running;
-            else
-                this->started_threads.remove(parent_id);
         }
+        //threadlist = None 这句在c++中应该没用
+        if (!still_running.isEmpty())
+            this->started_threads[parent_id] = still_running;
+        else
+            this->started_threads.remove(parent_id);
     }
 
     if (DEBUG_EDITOR) {
@@ -378,7 +377,6 @@ void StackHistory::_update_id_list()
 {
     id_list.clear();
     for (int i = 0; i < editor->tabs->count(); ++i) {
-        Q_ASSERT(i < editor->tabs->count());
         size_t val = reinterpret_cast<size_t>(editor->tabs->widget(i));
         id_list.append(val);
     }
@@ -541,6 +539,7 @@ void TabSwitcherWidget::set_dialog_position()
 
 void TabSwitcherWidget::keyReleaseEvent(QKeyEvent *event)
 {
+    // Handle "most recent used" tab behavior,
     if (this->isVisible()) {
         QString qsc = gui::get_shortcut("Editor", "Go to next file");//"Ctrl+Tab"
         foreach (QString key, qsc.split('+')) {
@@ -563,6 +562,7 @@ void TabSwitcherWidget::keyPressEvent(QKeyEvent *event)
 
 void TabSwitcherWidget::focusOutEvent(QFocusEvent *event)
 {
+    // Reimplement Qt method to close the widget when loosing focus.
     event->ignore();
 #if defined (Q_OS_MAC)
     if (event->reason() != Qt::ActiveWindowFocusReason)
@@ -618,10 +618,10 @@ EditorStack::EditorStack(QWidget* parent, const QList<QAction*>& actions)
             [=](){QApplication::clipboard()->setText(get_current_filename());});
 
     QAction* close_right = new QAction("Close all to the right", this);
-    connect(close_right,SIGNAL(triggered(bool)),this,SLOT(close_all_right()));
+    connect(close_right,SIGNAL(triggered()),this,SLOT(close_all_right()));
 
     QAction* close_all_but_this = new QAction("Close all but this", this);
-    connect(close_all_but_this,SIGNAL(triggered(bool)),this,SLOT(close_all_but_this()));
+    connect(close_all_but_this,SIGNAL(triggered()),this,SLOT(close_all_but_this()));
 
     QString text;
 #if defined (Q_OS_MAC)
@@ -983,14 +983,14 @@ void EditorStack::go_to_line(int line)
     if (line >= 0)
         get_current_editor()->go_to_line(line);
     else {
-        if (!this->data.empty())
+        if (!this->data.isEmpty())
             get_current_editor()->exec_gotolinedialog();
     }
 }
 
 void EditorStack::set_or_clear_breakpoint()
 {
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         CodeEditor* editor = get_current_editor();
         if (editor)
             editor->add_remove_breakpoint();
@@ -999,7 +999,7 @@ void EditorStack::set_or_clear_breakpoint()
 
 void EditorStack::set_or_edit_conditional_breakpoint()
 {
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         CodeEditor* editor = get_current_editor();
         if (editor)
             editor->add_remove_breakpoint(-1, QString(), true);
@@ -1039,7 +1039,7 @@ void EditorStack::set_outlineexplorer(OutlineExplorerWidget *outlineexplorer)
 void EditorStack::initialize_outlineexplorer()
 {
     for (int index = 0; index < get_stack_count(); ++index) {
-        if (index != get_stack_count())
+        if (index != get_stack_index())
             this->_refresh_outlineexplorer(index);
     }
 }
@@ -1100,7 +1100,7 @@ bool EditorStack::has_markers() const
 void EditorStack::set_todolist_enabled(bool state, FileInfo *current_finfo)
 {
     todolist_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data) {
             __update_editor_margins(finfo->editor);
             finfo->cleanup_todo_results();
@@ -1126,7 +1126,7 @@ void EditorStack::set_linenumbers_enabled(bool state, FileInfo *current_finfo)
 {
     Q_UNUSED(current_finfo);
     linenumbers_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             __update_editor_margins(finfo->editor);
     }
@@ -1135,7 +1135,7 @@ void EditorStack::set_linenumbers_enabled(bool state, FileInfo *current_finfo)
 void EditorStack::set_blanks_enabled(bool state)
 {
     blanks_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_blanks_enabled(state);
     }
@@ -1144,7 +1144,7 @@ void EditorStack::set_blanks_enabled(bool state)
 void EditorStack::set_edgeline_enabled(bool state)
 {
     edgeline_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_edge_line_enabled(state);
     }
@@ -1153,7 +1153,7 @@ void EditorStack::set_edgeline_enabled(bool state)
 void EditorStack::set_edgeline_column(int column)
 {
     edgeline_column = column;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_edge_line_column(column);
     }
@@ -1162,7 +1162,7 @@ void EditorStack::set_edgeline_column(int column)
 void EditorStack::set_codecompletion_auto_enabled(bool state)
 {
     codecompletion_auto_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_codecompletion_auto(state);
     }
@@ -1171,7 +1171,7 @@ void EditorStack::set_codecompletion_auto_enabled(bool state)
 void EditorStack::set_codecompletion_case_enabled(bool state)
 {
     codecompletion_case_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_codecompletion_case(state);
     }
@@ -1180,7 +1180,7 @@ void EditorStack::set_codecompletion_case_enabled(bool state)
 void EditorStack::set_codecompletion_enter_enabled(bool state)
 {
     codecompletion_enter_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_codecompletion_enter(state);
     }
@@ -1189,7 +1189,7 @@ void EditorStack::set_codecompletion_enter_enabled(bool state)
 void EditorStack::set_calltips_enabled(bool state)
 {
     calltips_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_calltips(state);
     }
@@ -1198,7 +1198,7 @@ void EditorStack::set_calltips_enabled(bool state)
 void EditorStack::set_go_to_definition_enabled(bool state)
 {
     go_to_definition_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_go_to_definition_enabled(state);
     }
@@ -1207,7 +1207,7 @@ void EditorStack::set_go_to_definition_enabled(bool state)
 void EditorStack::set_close_parentheses_enabled(bool state)
 {
     close_parentheses_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_close_parentheses_enabled(state);
     }
@@ -1216,7 +1216,7 @@ void EditorStack::set_close_parentheses_enabled(bool state)
 void EditorStack::set_close_quotes_enabled(bool state)
 {
     close_quotes_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_close_quotes_enabled(state);
     }
@@ -1225,7 +1225,7 @@ void EditorStack::set_close_quotes_enabled(bool state)
 void EditorStack::set_add_colons_enabled(bool state)
 {
     add_colons_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_add_colons_enabled(state);
     }
@@ -1234,7 +1234,7 @@ void EditorStack::set_add_colons_enabled(bool state)
 void EditorStack::set_auto_unindent_enabled(bool state)
 {
     auto_unindent_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_auto_unindent_enabled(state);
     }
@@ -1244,7 +1244,7 @@ void EditorStack::set_indent_chars(QString indent_chars)
 {
     indent_chars = indent_chars.mid(1, indent_chars.size()-2);
     this->indent_chars = indent_chars;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_indent_chars(indent_chars);
     }
@@ -1253,7 +1253,7 @@ void EditorStack::set_indent_chars(QString indent_chars)
 void EditorStack::set_tab_stop_width_spaces(int tab_stop_width_spaces)
 {
     this->tab_stop_width_spaces = tab_stop_width_spaces;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data) {
             finfo->editor->tab_stop_width_spaces = tab_stop_width_spaces;
             finfo->editor->update_tab_stop_width_spaces();
@@ -1271,7 +1271,7 @@ void EditorStack::set_default_font(const QFont &font, const QHash<QString,ColorB
     default_font = font;
     if (!color_scheme.isEmpty())
         this->color_scheme = color_scheme;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_font(font, color_scheme);
     }
@@ -1280,7 +1280,7 @@ void EditorStack::set_default_font(const QFont &font, const QHash<QString,ColorB
 void EditorStack::set_color_scheme(const QHash<QString, ColorBoolBool> &color_scheme)
 {
     this->color_scheme = color_scheme;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_color_scheme(color_scheme);
     }
@@ -1289,7 +1289,7 @@ void EditorStack::set_color_scheme(const QHash<QString, ColorBoolBool> &color_sc
 void EditorStack::set_wrap_enabled(bool state)
 {
     this->wrap_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->toggle_wrap_mode(state);
     }
@@ -1298,7 +1298,7 @@ void EditorStack::set_wrap_enabled(bool state)
 void EditorStack::set_tabmode_enabled(bool state)
 {
     this->tabmode_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_tab_mode(state);
     }
@@ -1307,7 +1307,7 @@ void EditorStack::set_tabmode_enabled(bool state)
 void EditorStack::set_intelligent_backspace_enabled(bool state)
 {
     this->intelligent_backspace_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->toggle_intelligent_backspace(state);
     }
@@ -1316,7 +1316,7 @@ void EditorStack::set_intelligent_backspace_enabled(bool state)
 void EditorStack::set_occurrence_highlighting_enabled(bool state)
 {
     this->occurrence_highlighting_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_occurrence_highlighting(state);
     }
@@ -1325,7 +1325,7 @@ void EditorStack::set_occurrence_highlighting_enabled(bool state)
 void EditorStack::set_occurrence_highlighting_timeout(int timeout)
 {
     occurrence_highlighting_timeout = timeout;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_occurrence_timeout(timeout);
     }
@@ -1334,7 +1334,7 @@ void EditorStack::set_occurrence_highlighting_timeout(int timeout)
 void EditorStack::set_highlight_current_line_enabled(bool state)
 {
     highlight_current_line_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_highlight_current_line(state);
     }
@@ -1343,7 +1343,7 @@ void EditorStack::set_highlight_current_line_enabled(bool state)
 void EditorStack::set_highlight_current_cell_enabled(bool state)
 {
     highlight_current_cell_enabled = state;
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         foreach (FileInfo* finfo, this->data)
             finfo->editor->set_highlight_current_cell(state);
     }
@@ -1504,8 +1504,7 @@ int EditorStack::rename_in_data(const QString &original_filename, const QString 
         QString language = get_file_language(new_filename, txt);
         finfo->editor->set_language(language);
     }
-    int set_new_index = get_stack_index();
-    index = set_new_index;
+    bool set_new_index = index == get_stack_index();
     QString current_fname = get_current_filename();
     finfo->filename = new_filename;
     int new_index = data.indexOf(finfo);
@@ -1539,7 +1538,7 @@ void EditorStack::__setup_menu()
 {
     this->menu->clear();
     QList<QAction*> actions;
-    if (!data.empty())
+    if (!data.isEmpty())
         actions = menu_actions;
     else {
         actions << new_action << open_action;
@@ -1596,16 +1595,16 @@ void EditorStack::update_actions()
     versplit_action->setEnabled(state);
 }
 
+// ------ Accessors
 QString EditorStack::get_current_filename() const
 {
-    if (!this->data.empty()) {
+    if (!this->data.isEmpty()) {
         Q_ASSERT(0 <= get_stack_index() && get_stack_index() < this->data.size());
         return data[get_stack_index()]->filename;
     }
     return QString();
 }
 
-// ------ Accessors
 int EditorStack::has_filename(const QString &filename) const
 {
     //osp.realpath <==> QFileInfo::canonicalFilePath
@@ -1663,11 +1662,8 @@ void EditorStack::move_editorstack_data(int start,int end)
     }
 
     this->blockSignals(true);
-
-    for (int i = start; i != end; i+=direction) {
+    for (int i = start; i != end; i+=direction)
         qSwap(this->data[i], this->data[i+direction]);
-    }
-
     this->blockSignals(false);
     this->refresh();
 }
@@ -1768,7 +1764,7 @@ void EditorStack::add_last_closed_file(const QString &fname)
         last_closed_files.removeOne(fname);
     last_closed_files.insert(0, fname);
     if (last_closed_files.size() > 10)
-        last_closed_files.pop_back();
+        last_closed_files.removeLast();
 }
 
 QStringList EditorStack::get_last_closed_files() const
@@ -1794,7 +1790,7 @@ bool EditorStack::save_if_changed(bool cancelable, int index)
         indexes.append(index);
     QMessageBox::StandardButtons buttons = QMessageBox::Yes | QMessageBox::No;
     if (cancelable)
-        buttons | QMessageBox::Cancel;
+        buttons |= QMessageBox::Cancel;
     int unsaved_nb = 0;
     foreach (index, indexes) {
         Q_ASSERT(0 <= index && index < this->data.size());
@@ -1906,7 +1902,7 @@ void EditorStack::file_saved_in_other_editorstack(const QString &original_filena
 
 QString EditorStack::select_savename(const QString &original_filename)
 {
-    if (edit_filetypes.empty())
+    if (edit_filetypes.isEmpty())
         edit_filetypes = get_edit_filetypes();
     if (edit_filters.isEmpty())
         edit_filters = get_edit_filters();
@@ -1999,7 +1995,8 @@ bool EditorStack::save_copy_as(int index)
 
 void EditorStack::save_all()
 {
-    for (int index = 0; index < this->get_stack_count(); ++index) {
+    int count = this->get_stack_count();
+    for (int index = 0; index < count; ++index) {
         Q_ASSERT(0 <= index && index < this->data.size());
         if (data[index]->editor->document()->isModified())
             this->save(index);
@@ -2010,12 +2007,12 @@ void EditorStack::save_all()
 //------ Update UI
 void EditorStack::start_stop_analysis_timer()
 {
-    /*
+
     is_analysis_done = false;
     if (realtime_analysis_enabled) {
         analysis_timer->stop();
         analysis_timer->start();
-    }*/
+    }
 }
 
 void EditorStack::analyze_script(int index)
@@ -2082,6 +2079,7 @@ void EditorStack::current_changed(int index)
         qDebug() << __FILE__ << __FUNCTION__;
         return;
     }
+
     if (index != -1) {
         editor->setFocus();
         if (DEBUG_EDITOR)
@@ -2145,7 +2143,7 @@ void EditorStack::_refresh_outlineexplorer(int index, bool update, bool clear)
     if (index == -1)
         index = get_stack_index();
     bool enable = false;
-    if (!data.empty()) {
+    if (!data.isEmpty()) {
         Q_ASSERT(0 <= index && index < this->data.size());
         FileInfo* finfo = data[index];
         if (finfo->editor->is_python()) {
@@ -2164,8 +2162,8 @@ void EditorStack::__refresh_statusbar(int index)
     FileInfo* finfo = data[index];
     emit encoding_changed(finfo->encoding);
     QPair<int,int> pair = finfo->editor->get_cursor_line_column();
-    int line=pair.first;
-    index=pair.second;
+    int line = pair.first;
+    index = pair.second;
     emit sig_editor_cursor_position_changed(line, index);
 }
 
@@ -2210,7 +2208,6 @@ void EditorStack::__check_file_status(int index)
         else {
             finfo->newly_created = true;
             finfo->editor->document()->setModified(true);
-            qDebug() << __func__ << finfo->editor->document()->isModified();
             modification_changed(-1, index);
         }
     }
@@ -2250,7 +2247,7 @@ void EditorStack::__modify_stack_title()
 void EditorStack::refresh(int index)
 {
     if (index == -1)
-        index  = get_stack_index();
+        index = get_stack_index();
     CodeEditor* editor;
     if (get_stack_count()) {
         index = get_stack_index();
@@ -2283,7 +2280,7 @@ void EditorStack::modification_changed(int state, int index, size_t editor_id)
     }
     emit opened_files_list_changed();
 
-    if (index == -1)
+    if (index == -2) //该函数中用-2表示None
         index = get_stack_index();
     if (index == -1)
         return;
@@ -2306,7 +2303,7 @@ void EditorStack::modification_changed(int state, int index, size_t editor_id)
 void EditorStack::refresh_eol_chars(const QString &eol_chars)
 {
     QString os_name = sourcecode::get_os_name_from_eol_chars(eol_chars);
-    //emit sig_refresh_eol_chars(os_name);不发送该信号就可以不用注释switch_to_plugin
+    emit sig_refresh_eol_chars(os_name);//不发送该信号就可以不用注释switch_to_plugin
 }
 
 void EditorStack::reload(int index)
@@ -2425,7 +2422,7 @@ FileInfo* EditorStack::create_new_editor(const QString &fname, const QString &en
             this,SLOT(editor_cursor_position_changed(int,int)));
     connect(editor,SIGNAL(textChanged()),this,SLOT(start_stop_analysis_timer()));
     connect(editor,&QPlainTextEdit::modificationChanged,
-            [=](bool state){this->modification_changed((state ? 1 :0),-1,reinterpret_cast<size_t>(editor));});
+            [=](bool state){this->modification_changed((state ? 1 :0),-2,reinterpret_cast<size_t>(editor));});
     connect(editor,SIGNAL(focus_in()),this,SLOT(focus_changed()));
     connect(editor,SIGNAL(zoom_in()),this,SIGNAL(zoom_in()));
     connect(editor,SIGNAL(zoom_out()),this,SIGNAL(zoom_out()));
@@ -2456,10 +2453,8 @@ FileInfo* EditorStack::_new(const QString &filename, const QString &encoding,
 {
     FileInfo* finfo = this->create_new_editor(filename, encoding, text, false, true);
     finfo->editor->set_cursor_position("eof");
-    if (!empty) {
-
+    if (!empty)
         finfo->editor->insert_text(os::linesep);
-    }
     if (default_content) {
         finfo->_default = true;
         finfo->editor->document()->setModified(false);
@@ -2503,7 +2498,6 @@ void EditorStack::set_os_eol_chars(int index)
     QString eol_chars = sourcecode::get_eol_chars_from_os_name(os::name);
     finfo->editor->set_eol_chars(eol_chars);
     finfo->editor->document()->setModified(true);
-    qDebug() << __func__ << finfo->editor->document()->isModified();
 }
 
 void EditorStack::remove_trailing_spaces(int index)
@@ -2560,30 +2554,21 @@ void EditorStack::run_cell_and_advance()
 
 void EditorStack::advance_cell(bool reverse)
 {
-    if (!reverse) {
-        if (focus_to_editor)
-            get_current_editor()->go_to_next_cell();
-        else {
-            QWidget* term = QApplication::focusWidget();
-            get_current_editor()->go_to_next_cell();
-            term->setFocus();
-            term = QApplication::focusWidget();
-            get_current_editor()->go_to_next_cell();
-            term->setFocus();
-        }
-    }
+    std::function<void()> move_func;
+    if (!reverse)
+        move_func = [this](){this->get_current_editor()->go_to_next_cell();};
+    else
+        move_func = [this](){this->get_current_editor()->go_to_previous_cell();};
 
+    if (focus_to_editor)
+        move_func();
     else {
-        if (focus_to_editor)
-            get_current_editor()->go_to_previous_cell();
-        else {
-            QWidget* term = QApplication::focusWidget();
-            get_current_editor()->go_to_previous_cell();
-            term->setFocus();
-            term = QApplication::focusWidget();
-            get_current_editor()->go_to_previous_cell();
-            term->setFocus();
-        }
+        QWidget* term = QApplication::focusWidget();
+        move_func();
+        term->setFocus();
+        term = QApplication::focusWidget();
+        move_func();
+        term->setFocus();
     }
 }
 
@@ -2654,8 +2639,8 @@ void EditorStack::dropEvent(QDropEvent *event)
 /********** EditorSplitter **********/
 EditorSplitter::EditorSplitter(QWidget* parent, Editor *plugin,
                                const QList<QAction*>& menu_actions, bool first,
-                               Register_Editorstack_cb *register_editorstack_cb,
-                               Register_Editorstack_cb *unregister_editorstack_cb)
+                               std::function<void(EditorStack*)> register_editorstack_cb,
+                               std::function<bool(EditorStack*)> unregister_editorstack_cb)
     : QSplitter (parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
@@ -2667,16 +2652,16 @@ EditorSplitter::EditorSplitter(QWidget* parent, Editor *plugin,
     this->plugin = plugin;
 
     if (register_editorstack_cb == nullptr)
-        register_editorstack_cb = this->plugin;
+        register_editorstack_cb = [this](EditorStack* stack){this->plugin->register_editorstack(stack);};
     this->register_editorstack_cb = register_editorstack_cb;
     if (unregister_editorstack_cb == nullptr)
-        unregister_editorstack_cb = this->plugin;
+        unregister_editorstack_cb = [this](EditorStack* stack){return this->plugin->unregister_editorstack(stack);};
     this->unregister_editorstack_cb = unregister_editorstack_cb;
 
     this->menu_actions = menu_actions;
     editorstack = new EditorStack(this,menu_actions);
-    this->register_editorstack_cb->register_editorstack(this->editorstack);
-    if (! first)
+    this->register_editorstack_cb(this->editorstack);
+    if (!first)
         this->plugin->clone_editorstack(this->editorstack);
     connect(editorstack,SIGNAL(destroyed(QObject*)),this,SLOT(editorstack_closed()));
     connect(editorstack,&EditorStack::split_vertically,
@@ -2695,14 +2680,13 @@ void EditorSplitter::__give_focus_to_remaining_editor()
 
 void EditorSplitter::editorstack_closed()
 {
-    qDebug() << "method 'editorstack_closed':";
     if (DEBUG_EDITOR) {
         qDebug() << "method 'editorstack_closed':";
         qDebug() << "    self  :" << this;
     }
     bool close_splitter;
     try {
-        unregister_editorstack_cb->unregister_editorstack(this->editorstack);
+        unregister_editorstack_cb(this->editorstack);
         editorstack = nullptr;
         close_splitter = count() == 1;
     } catch (...) {
@@ -2723,7 +2707,7 @@ void EditorSplitter::editorsplitter_closed()
     }
     bool close_splitter;
     try {
-        close_splitter = count() == 1 && editorstack != nullptr;
+        close_splitter = count() == 1 && editorstack == nullptr;
     } catch (...) {
         return;
     }
@@ -2741,7 +2725,7 @@ void EditorSplitter::split(Qt::Orientation orientation)
     setOrientation(orientation);
     editorstack->set_orientation(orientation);
     QWidget* parent = qobject_cast<QWidget*>(this->parent());
-    EditorSplitter* editorsplitter = new EditorSplitter(parent,plugin,menu_actions,
+    EditorSplitter* editorsplitter = new EditorSplitter(parent,plugin,menu_actions,false,
                                                         this->register_editorstack_cb,
                                                         this->unregister_editorstack_cb);
     addWidget(editorsplitter);
@@ -2794,7 +2778,7 @@ void EditorSplitter::set_layout_settings(const SplitSettings &settings)
                 splitter->split(Qt::Vertical);
             else
                 splitter->split(Qt::Horizontal);
-            splitter = qobject_cast<EditorSplitter*>(widget(1));
+            splitter = qobject_cast<EditorSplitter*>(splitter->widget(1));
         }
         EditorStack* editorstack = qobject_cast<EditorStack*>(splitter->widget(0));
         for (int i = 0; i < editorstack->data.size(); ++i) {
@@ -2854,8 +2838,9 @@ EditorWidget::EditorWidget(QMainWindow* parent, Editor *plugin,
     QVBoxLayout* editor_layout = new QVBoxLayout;
     editor_layout->setContentsMargins(0, 0, 0, 0);
     editor_widgets->setLayout(editor_layout);
-    editorsplitter = new EditorSplitter(this, plugin, menu_actions,
-                                        false, this, this);
+    editorsplitter = new EditorSplitter(this, plugin, menu_actions, false,
+                                        [this](EditorStack* stack){this->register_editorstack(stack);},
+                                        [this](EditorStack* stack){return this->unregister_editorstack(stack);});
     editor_layout->addWidget(editorsplitter);
     editor_layout->addWidget(this->find_widget);
 
@@ -2891,6 +2876,7 @@ void EditorWidget::register_editorstack(EditorStack *editorstack)
             cursorpos_status,SLOT(cursor_position_changed(int,int)));
     connect(editorstack,SIGNAL(sig_refresh_eol_chars(QString)),eol_status,SLOT(eol_changed(QString)));
     plugin->register_editorstack(editorstack);
+
     QToolButton* oe_btn = new QToolButton(this);
     oe_btn->setDefaultAction(outlineexplorer->visibility_action);
     QList<QPair<int, QToolButton*>> widgets;
@@ -2962,7 +2948,7 @@ EditorMainWindow::EditorMainWindow(Editor *plugin,
         QAction* quit_action = new QAction("Close window", this);
         quit_action->setIcon(ima::get_icon("close_panel.png"));
         quit_action->setToolTip("Close this window");
-        connect(quit_action,SIGNAL(triggered(bool)),this,SLOT(close()));
+        connect(quit_action,SIGNAL(triggered()),this,SLOT(close()));
 
         this->menus.clear();
         for (int index = 0; index < menu_list.size(); ++index) {

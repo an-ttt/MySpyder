@@ -501,7 +501,7 @@ void TextEditBaseWidget::__highlight(const QList<int> &positions, QColor color, 
 
 void TextEditBaseWidget::cursor_position_changed()
 {
-    if (!this->bracepos.empty()) {
+    if (!this->bracepos.isEmpty()) {
         this->__highlight(this->bracepos, QColor(), true);
         this->bracepos.clear();
     }

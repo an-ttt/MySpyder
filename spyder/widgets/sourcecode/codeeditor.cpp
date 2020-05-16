@@ -389,32 +389,10 @@ CodeEditor::CodeEditor(QWidget* parent)
             [=](int){ this->rehighlight_cells(); });
 }
 
-void CodeEditor::cb_maker(const QString& attr)
+void CodeEditor::cb_maker(int attr)
 {
     QTextCursor cursor = this->textCursor();
-    QTextCursor::MoveOperation move_type;
-    if (attr == "StartOfLine")
-        move_type = QTextCursor::StartOfLine;
-    else if (attr == "EndOfLine")
-        move_type = QTextCursor::EndOfLine;
-    else if (attr == "Up")
-        move_type = QTextCursor::Up;
-    else if (attr == "Down")
-        move_type = QTextCursor::Down;
-    else if (attr == "Left")
-        move_type = QTextCursor::Left;
-    else if (attr == "Right")
-        move_type = QTextCursor::Right;
-    else if (attr == "PreviousWord")
-        move_type = QTextCursor::PreviousWord;
-    else if (attr == "NextWord")
-        move_type = QTextCursor::NextWord;
-    else if (attr == "Start")
-        move_type = QTextCursor::Start;
-    else if (attr == "End")
-        move_type = QTextCursor::End;
-    else
-        return;
+    auto move_type = static_cast<QTextCursor::MoveOperation>(attr);
     cursor.movePosition(move_type);
     this->setTextCursor(cursor);
 }
@@ -505,56 +483,56 @@ QList<ShortCutStrStr> CodeEditor::create_shortcuts()
     keystr = "Meta+A";//
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "StartOfLine");//
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::StartOfLine));//
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr line_start(qsc,"Editor","Start of line");//
 
     keystr = "Meta+E";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "EndOfLine");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::EndOfLine));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr line_end(qsc,"Editor","End of line");
 
     keystr = "Meta+P";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "Up");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::Up));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr prev_line(qsc,"Editor","Previous line");
 
     keystr = "Meta+N";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "Down");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::Down));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr next_line(qsc,"Editor","Next line");
 
     keystr = "Meta+B";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "Left");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::Left));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr prev_char(qsc,"Editor","Previous char");
 
     keystr = "Meta+F";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "Right");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::Right));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr next_char(qsc,"Editor","Next char");
 
     keystr = "Meta+Left";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "PreviousWord");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::PreviousWord));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr prev_word(qsc,"Editor","Previous word");
 
     keystr = "Meta+Right";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "NextWord");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::NextWord));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr next_word(qsc,"Editor","Next word");
 
@@ -596,20 +574,20 @@ QList<ShortCutStrStr> CodeEditor::create_shortcuts()
     keystr = "Ctrl+Home";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "Start");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::Start));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr start_doc(qsc,"Editor","Start of Document");
 
     keystr = "Ctrl+End";
     qsc = new QShortcut(QKeySequence(keystr), this);
     connect(qsc,SIGNAL(activated()),signalMapper,SLOT(map()));
-    signalMapper->setMapping(qsc, "End");
+    signalMapper->setMapping(qsc, static_cast<int>(QTextCursor::End));
     qsc->setContext(Qt::WidgetWithChildrenShortcut);
     ShortCutStrStr end_doc(qsc,"Editor","End of Document");
 
     //
-    connect(signalMapper, SIGNAL(mapped(QString)),
-                  this, SLOT(cb_maker(QString)));
+    connect(signalMapper, SIGNAL(mapped(int)),
+                  this, SLOT(cb_maker(int)));
 
     keystr = "Ctrl+Z";
     qsc = new QShortcut(QKeySequence(keystr), this, SLOT(undo()));
@@ -1287,7 +1265,7 @@ void CodeEditor::clear_found_results()
 
 void CodeEditor::__text_has_changed()
 {
-    if (!found_results.empty())
+    if (!found_results.isEmpty())
         clear_found_results();
 }
 
@@ -1351,17 +1329,6 @@ void CodeEditor::update_linenumberarea(const QRect &qrect, int dy)
 }
 
 
-void CodeEditor::draw_pixmap(int ytop, const QPixmap &pixmap, QPainter *painter,int font_height)
-{
-    int pixmap_height;
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-    pixmap_height = pixmap.height();
-#else
-    pixmap_height = static_cast<int>(pixmap.height() / pixmap.devicePixelRatio());
-#endif
-    painter->drawPixmap(0, ytop + (font_height-pixmap_height) / 2,
-                        pixmap);
-}
 void CodeEditor::linenumberarea_paint_event(QPaintEvent *event)
 {
     QPainter painter(this->linenumberarea);
@@ -1373,7 +1340,17 @@ void CodeEditor::linenumberarea_paint_event(QPaintEvent *event)
     QTextBlock active_block = this->textCursor().block();
     int active_line_number = active_block.blockNumber()+1;
 
-    //qDebug()<<__FUNCTION__<<__visible_blocks.size();
+    auto draw_pixmap = [&](int ytop, const QPixmap &pixmap)
+    {
+        int pixmap_height;
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+        pixmap_height = pixmap.height();
+#else
+        pixmap_height = static_cast<int>(pixmap.height() / pixmap.devicePixelRatio());
+#endif
+        painter.drawPixmap(0, ytop + (font_height-pixmap_height) / 2, pixmap);
+    };
+
     foreach (auto pair, this->__visible_blocks) {
         int top = pair.top;
         int line_number = pair.line_number;
@@ -1389,7 +1366,7 @@ void CodeEditor::linenumberarea_paint_event(QPaintEvent *event)
                 painter.setFont(font);
                 painter.setPen(this->linenumbers_color);
             }
-            //qDebug()<<line_number;
+
             painter.drawText(0, top, linenumberarea->width(),
                              font_height,
                              Qt::AlignRight | Qt::AlignBottom,
@@ -1406,17 +1383,17 @@ void CodeEditor::linenumberarea_paint_event(QPaintEvent *event)
                         break;
                 }
                 if (error)
-                    draw_pixmap(top,error_pixmap,&painter,font_height);
+                    draw_pixmap(top,error_pixmap);
                 else
-                    draw_pixmap(top,warning_pixmap,&painter,font_height);
+                    draw_pixmap(top,warning_pixmap);
             }
             if (!data->todo.isEmpty())
-                draw_pixmap(top,todo_pixmap,&painter,font_height);
+                draw_pixmap(top,todo_pixmap);
             if (data->breakpoint) {
                 if (data->breakpoint_condition.isEmpty())
-                    draw_pixmap(top,this->bp_pixmap,&painter,font_height);
+                    draw_pixmap(top,this->bp_pixmap);
                 else
-                    draw_pixmap(top,this->bpc_pixmap,&painter,font_height);
+                    draw_pixmap(top,this->bpc_pixmap);
             }
         }
     }
@@ -1485,20 +1462,17 @@ void CodeEditor::linenumberarea_select_lines(int linenumber_pressed, int linenum
     int start_line = linenumber_pressed;
     QTextBlock start_block = this->document()->findBlockByLineNumber(start_line-1);
 
-
     QTextCursor cursor = this->textCursor();
     cursor.setPosition(start_block.position());
 
     if (move_n_blocks > 0) {
-        for (int n = 0; n < qAbs(move_n_blocks)+1; ++n) {
+        for (int n = 0; n < qAbs(move_n_blocks)+1; ++n)
             cursor.movePosition(cursor.NextBlock, cursor.KeepAnchor);
-        }
     }
     else {
         cursor.movePosition(cursor.NextBlock);
-        for (int n = 0; n < qAbs(move_n_blocks)+1; ++n) {
+        for (int n = 0; n < qAbs(move_n_blocks)+1; ++n)
             cursor.movePosition(cursor.PreviousBlock, cursor.KeepAnchor);
-        }
     }
 
     if (linenumber_released == this->blockCount())
@@ -1506,7 +1480,7 @@ void CodeEditor::linenumberarea_select_lines(int linenumber_pressed, int linenum
     else
         cursor.movePosition(cursor.StartOfBlock,cursor.KeepAnchor);
 
-    this->setTextCursor(cursor); // 这里调用了setTextCursor更新可见光标
+    this->setTextCursor(cursor);
 }
 
 
@@ -1909,7 +1883,7 @@ void CodeEditor::go_to_line(int line, const QString &word)
     else
         connect(this,SIGNAL(focus_in()),this,SLOT(center_cursor_on_next_focus()));
     this->horizontalScrollBar()->setValue(0);
-    if (!word.isEmpty() && !block.text().isEmpty())
+    if (!word.isEmpty() && block.text().contains(word))
         this->find(word, QTextDocument::FindCaseSensitively);
 }
 
@@ -1936,18 +1910,11 @@ void CodeEditor::cleanup_code_analysis()
     linenumberarea->update();
 }
 
-bool CodeEditor::is_line_splitted(int line_no, QTextDocument *document)
-{
-    QString text = document->findBlockByNumber(line_no).text();
-    QString stripped = text.trimmed();
-    return stripped.endsWith("\\") || stripped.endsWith(',')
-            || stripped.size() == 0;
-}
 
 void CodeEditor::process_code_analysis(const QList<QList<QVariant> > &check_results)
 {
     cleanup_code_analysis();
-    if (check_results.empty())
+    if (check_results.isEmpty())
         return;
     setUpdatesEnabled(false);
     QTextCursor cursor = textCursor();
@@ -1964,17 +1931,22 @@ void CodeEditor::process_code_analysis(const QList<QList<QVariant> > &check_resu
         data->code_analysis.append(qMakePair(message, error));
         block.setUserData(data);
         QRegularExpression re("\\'[a-zA-Z0-9_]*\\'");
-        if (!re.isValid()) {
-            qDebug()<<__FILE__<<__LINE__;
-            return;
-        }
         QRegularExpressionMatchIterator iterator = re.globalMatch(message);
         while (iterator.hasNext()) {
             QRegularExpressionMatch match = iterator.next();
             QString text = match.captured().chopped(1);
             text = text.mid(1);
+
+            auto is_line_splitted = [=](int line_no)
+            {
+                QString text = document->findBlockByNumber(line_no).text();
+                QString stripped = text.trimmed();
+                return stripped.endsWith("\\") || stripped.endsWith(',')
+                        || stripped.size() == 0;
+            };
+
             int line2 = line_number-1;
-            while (line2<this->blockCount()-1 && is_line_splitted(line2,document))
+            while (line2<this->blockCount()-1 && is_line_splitted(line2))
                 line2++;
             cursor.setPosition(block.position());
             cursor.movePosition(QTextCursor::StartOfBlock);
@@ -2021,7 +1993,7 @@ int CodeEditor::go_to_next_warning()
         else
             block = this->document()->firstBlock();
         data = dynamic_cast<BlockUserData*>(block.userData());
-        if (data && !data->code_analysis.empty())
+        if (data && !data->code_analysis.isEmpty())
             break;
     }
     int line_number = block.blockNumber()+1;
@@ -2040,7 +2012,7 @@ int CodeEditor::go_to_previous_warning()
         else
             block = this->document()->lastBlock();
         data = dynamic_cast<BlockUserData*>(block.userData());
-        if (data && !data->code_analysis.empty())
+        if (data && !data->code_analysis.isEmpty())
             break;
     }
     int line_number = block.blockNumber()+1;
@@ -2268,7 +2240,7 @@ bool CodeEditor::fix_indent_smart(bool forward, bool comment_or_string)
               !prevtext.trimmed().startsWith('#') && !prevtext.isEmpty()) ||
              !prevtext.isEmpty()) {
 
-            if (!prevtext.trimmed().split(QRegularExpression("\\s"))[0].contains("return") &&
+            if (!prevtext.trimmed().split(QRegularExpression("\\s")).mid(0,1).contains("return") &&
                     (prevtext.trimmed().endsWith(')') ||
                      prevtext.trimmed().endsWith(']') ||
                      prevtext.trimmed().endsWith('}')))
@@ -2321,7 +2293,7 @@ bool CodeEditor::fix_indent_smart(bool forward, bool comment_or_string)
                 (prevtext.endsWith("continue") ||
                  prevtext.endsWith("break") ||
                  prevtext.endsWith("pass") ||
-                 (prevtext.trimmed().split(QRegularExpression("\\t"))[0].contains("return") &&
+                 (prevtext.trimmed().split(QRegularExpression("\\t")).mid(0,1).contains("return") &&
                   prevtext.split(QRegularExpression("\\(|\\{|\\[")).size() ==
                   prevtext.split(QRegularExpression("\\)|\\}|\\]")).size()))) {
             if (this->indent_chars == "\t")
@@ -2330,6 +2302,7 @@ bool CodeEditor::fix_indent_smart(bool forward, bool comment_or_string)
                 correct_indent -= this->indent_chars.size();
         }
         else if (prevtext.split(QRegularExpression("\\(|\\{|\\[")).size() > 1) {
+            // Dummy elemet to avoid index errors
             QStringList stack = {"dummy"};
             QChar deactivate = QChar(0);
             foreach (QChar c, prevtext) {
@@ -2342,14 +2315,15 @@ bool CodeEditor::fix_indent_smart(bool forward, bool comment_or_string)
                 else if (c=='(' || c=='[' || c=='{')
                     stack.append(c);
                 else if (c==')' && stack.last()=="(")
-                    stack.pop_back();
+                    stack.removeLast();
                 else if (c==']' && stack.last()=="[")
-                    stack.pop_back();
+                    stack.removeLast();
                 else if (c=='}' && stack.last()=="{")
-                    stack.pop_back();
+                    stack.removeLast();
             }
-            if (stack.size() == 1)
-                ;
+            if (stack.size() == 1) {
+
+            }
             else if (prevtext.indexOf(QRegularExpression("[\\(|\\{|\\[]\\s*$"))>-1 &&
                      ((this->indent_chars=="\t" &&
                        this->tab_stop_width_spaces*2 < prevtext.size()) ||
@@ -2648,17 +2622,14 @@ void CodeEditor::blockcomment()
     cursor.endEditBlock();
 }
 
-bool CodeEditor::__is_comment_bar(const QTextCursor &cursor)
-{
-    return cursor.block().text().startsWith(this->__blockcomment_bar());
-}
-bool CodeEditor::__in_block_comment(const QTextCursor &cursor)
-{
-    QString cs = this->comment_string;
-    return cursor.block().text().startsWith(cs);
-}
+
 void CodeEditor::unblockcomment()
 {
+    auto __is_comment_bar = [this](const QTextCursor &cursor)
+    {
+        return cursor.block().text().startsWith(this->__blockcomment_bar());
+    };
+
     QTextCursor cursor1 = this->textCursor();
     if (__is_comment_bar(cursor1))
         return;
@@ -2670,7 +2641,14 @@ void CodeEditor::unblockcomment()
     if (!__is_comment_bar(cursor1))
         return;
 
-    QTextCursor cursor2 = this->textCursor();
+    auto __in_block_comment = [this](const QTextCursor &cursor)
+    {
+        QString cs = this->comment_string;
+        return cursor.block().text().startsWith(cs);
+
+    };
+
+    QTextCursor cursor2 = QTextCursor(cursor1);
     cursor2.movePosition(QTextCursor::NextBlock);
     while (!__is_comment_bar(cursor2) && __in_block_comment(cursor2)) {
         cursor2.movePosition(QTextCursor::NextBlock);
@@ -2714,7 +2692,7 @@ void CodeEditor::kill_line_end()
         cursor.movePosition(QTextCursor::NextBlock,
                             QTextCursor::KeepAnchor);
     this->_kill_ring->kill_cursor(&cursor);
-    this->setTextCursor(cursor); // 这里调用了setTextCursor
+    this->setTextCursor(cursor);
 }
 
 void CodeEditor::kill_line_start()
@@ -2724,7 +2702,7 @@ void CodeEditor::kill_line_start()
     cursor.movePosition(QTextCursor::StartOfBlock,
                         QTextCursor::KeepAnchor);
     this->_kill_ring->kill_cursor(&cursor);
-    this->setTextCursor(cursor); // 这里调用了setTextCursor
+    this->setTextCursor(cursor);
 }
 
 QTextCursor CodeEditor::_get_word_start_cursor(int position)
@@ -3458,7 +3436,7 @@ void CodeEditor::contextMenuEvent(QContextMenuEvent *event)
 
 void CodeEditor::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (!mimedata2url(event->mimeData()).empty())
+    if (!mimedata2url(event->mimeData()).isEmpty())
         event->ignore();
     else
         TextEditBaseWidget::dragEnterEvent(event);
@@ -3466,7 +3444,7 @@ void CodeEditor::dragEnterEvent(QDragEnterEvent *event)
 
 void CodeEditor::dropEvent(QDropEvent *event)
 {
-    if (!mimedata2url(event->mimeData()).empty())
+    if (!mimedata2url(event->mimeData()).isEmpty())
         event->ignore();
     else
         TextEditBaseWidget::dropEvent(event);

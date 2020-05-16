@@ -223,7 +223,7 @@ void MainWindow::setup()
 
     close_dockwidget_action = new QAction("Close current pane", this);
     close_dockwidget_action->setIcon(ima::icon("DialogCloseButton"));
-    connect(close_dockwidget_action, SIGNAL(triggered(bool)), SLOT(close_current_dockwidget()));
+    connect(close_dockwidget_action, SIGNAL(triggered()), SLOT(close_current_dockwidget()));
     close_dockwidget_action->setShortcutContext(Qt::ApplicationShortcut);
     this->register_shortcut(close_dockwidget_action, "_", "Close pane");
 
@@ -234,12 +234,12 @@ void MainWindow::setup()
     this->register_shortcut(lock_dockwidgets_action, "_", "Lock unlock panes");
 
     toggle_next_layout_action = new QAction("Use next layout", this);
-    connect(toggle_next_layout_action, SIGNAL(triggered(bool)), SLOT(toggle_next_layout()));
+    connect(toggle_next_layout_action, SIGNAL(triggered()), SLOT(toggle_next_layout()));
     toggle_next_layout_action->setShortcutContext(Qt::ApplicationShortcut);
     this->register_shortcut(toggle_next_layout_action, "_", "Use next layout");
 
     toggle_previous_layout_action = new QAction("Use next layout", this);
-    connect(toggle_previous_layout_action, SIGNAL(triggered(bool)), SLOT(toggle_previous_layout()));
+    connect(toggle_previous_layout_action, SIGNAL(triggered()), SLOT(toggle_previous_layout()));
     toggle_previous_layout_action->setShortcutContext(Qt::ApplicationShortcut);
     this->register_shortcut(toggle_previous_layout_action, "_", "Use previous layout");
 
@@ -253,7 +253,7 @@ void MainWindow::setup()
     symbol_finder_action = new QAction("Symbol finder...", this);
     symbol_finder_action->setIcon(ima::icon("symbol_find"));
     symbol_finder_action->setToolTip("Fast symbol search in file");
-    connect(symbol_finder_action, SIGNAL(triggered(bool)), SLOT(open_symbolfinder()));
+    connect(symbol_finder_action, SIGNAL(triggered()), SLOT(open_symbolfinder()));
     symbol_finder_action->setShortcutContext(Qt::ApplicationShortcut);
     this->register_shortcut(symbol_finder_action, "_", "symbol finder", true);
 
@@ -261,37 +261,37 @@ void MainWindow::setup()
     file_toolbar_actions << file_switcher_action << symbol_finder_action;
 
     undo_action = new QAction(ima::icon("undo"), "Undo", this);
-    connect(undo_action, SIGNAL(triggered(bool)), SLOT(global_callback()));
+    connect(undo_action, SIGNAL(triggered()), SLOT(global_callback()));
     undo_action->setData("undo");
     undo_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(undo_action, "Editor", "Undo");
 
     redo_action = new QAction(ima::icon("redo"), "Redo", this);
-    connect(redo_action, SIGNAL(triggered(bool)), SLOT(global_callback()));
+    connect(redo_action, SIGNAL(triggered()), SLOT(global_callback()));
     redo_action->setData("redo");
     redo_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(redo_action, "Editor", "Redo");
 
     copy_action = new QAction(ima::icon("editcopy"), "Copy", this);
-    connect(copy_action, SIGNAL(triggered(bool)), SLOT(global_callback()));
+    connect(copy_action, SIGNAL(triggered()), SLOT(global_callback()));
     copy_action->setData("copy");
     copy_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(copy_action, "Editor", "Copy");
 
     cut_action = new QAction(ima::icon("editcut"), "Cut", this);
-    connect(cut_action, SIGNAL(triggered(bool)), SLOT(global_callback()));
+    connect(cut_action, SIGNAL(triggered()), SLOT(global_callback()));
     cut_action->setData("cut");
     cut_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(cut_action, "Editor", "Cut");
 
     paste_action = new QAction(ima::icon("editpaste"), "Paste", this);
-    connect(paste_action, SIGNAL(triggered(bool)), SLOT(global_callback()));
+    connect(paste_action, SIGNAL(triggered()), SLOT(global_callback()));
     paste_action->setData("paste");
     paste_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(paste_action, "Editor", "Paste");
 
     selectall_action = new QAction(ima::icon("selectall"), "Select All", this);
-    connect(selectall_action, SIGNAL(triggered(bool)), SLOT(global_callback()));
+    connect(selectall_action, SIGNAL(triggered()), SLOT(global_callback()));
     selectall_action->setData("selectAll");
     selectall_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(selectall_action, "Editor", "Select All");
@@ -340,13 +340,13 @@ void MainWindow::setup()
     qDebug() << "  ..tools";
 
     QAction* prefs_action = new QAction(ima::icon("configure"), "Pre&ferences", this);
-    connect(prefs_action, SIGNAL(triggered(bool)), SLOT(edit_preferences()));
+    connect(prefs_action, SIGNAL(triggered()), SLOT(edit_preferences()));
     prefs_action->setShortcutContext(Qt::ApplicationShortcut);
     this->register_shortcut(prefs_action, "_", "Preferences", true);
 
     QAction* spyder_path_action = new QAction(ima::icon("pythonpath"), "PYTHONPATH manager", this);
     spyder_path_action->setToolTip("Python Path Manager");
-    connect(spyder_path_action, SIGNAL(triggered(bool)), SLOT(path_manager_callback()));
+    connect(spyder_path_action, SIGNAL(triggered()), SLOT(path_manager_callback()));
     spyder_path_action->setMenuRole(QAction::ApplicationSpecificRole);
 
     QAction* update_modules_action = new QAction("Update module names list", this);
@@ -354,7 +354,7 @@ void MainWindow::setup()
     //triggered=lambda: module_completion.reset()
 
     QAction* reset_spyder_action = new QAction("Reset Spyder to factory defaults", this);
-    connect(reset_spyder_action, SIGNAL(triggered(bool)), SLOT(reset_spyder()));
+    connect(reset_spyder_action, SIGNAL(triggered()), SLOT(reset_spyder()));
 
     this->tools_menu_actions.clear();
     tools_menu_actions << prefs_action << spyder_path_action;
@@ -379,7 +379,7 @@ void MainWindow::setup()
     this->__update_maximize_action();
 
     fullscreen_action = new QAction("Fullscreen mode", this);
-    connect(fullscreen_action, SIGNAL(triggered(bool)), SLOT(toggle_fullscreen()));
+    connect(fullscreen_action, SIGNAL(triggered()), SLOT(toggle_fullscreen()));
     fullscreen_action->setShortcutContext(Qt::ApplicationShortcut);
     this->register_shortcut(fullscreen_action, "_", "Fullscreen mode", true);
 
@@ -470,16 +470,16 @@ void MainWindow::setup()
 
     // Help menu
     QAction* trouble_action = new QAction("Troubleshooting...", this);
-    connect(trouble_action, SIGNAL(triggered(bool)), SLOT(trouble_guide()));
+    connect(trouble_action, SIGNAL(triggered()), SLOT(trouble_guide()));
 
     QAction* dep_action = new QAction(ima::icon("advanced"), "Dependencies...", this);
-    connect(dep_action, SIGNAL(triggered(bool)), SLOT(show_dependencies()));
+    connect(dep_action, SIGNAL(triggered()), SLOT(show_dependencies()));
 
     QAction* report_action = new QAction(ima::icon("bug"), "Report issue...", this);
     connect(report_action, &QAction::triggered, [this](){this->report_issue();});
 
     QAction* support_action = new QAction("Spyder support...", this);
-    connect(support_action, SIGNAL(triggered(bool)), SLOT(google_group()));
+    connect(support_action, SIGNAL(triggered()), SLOT(google_group()));
 
     check_updates_action = new QAction("Check for updates...", this);
     connect(check_updates_action, &QAction::triggered, [this](){this->check_updates();});
@@ -495,7 +495,7 @@ void MainWindow::setup()
 
     QAction* shortcuts_action = new QAction("Shortcuts Summary", this);
     shortcuts_action->setShortcut(QKeySequence("Meta+F1"));
-    connect(shortcuts_action, SIGNAL(triggered(bool)), SLOT(show_shortcuts_dialog()));
+    connect(shortcuts_action, SIGNAL(triggered()), SLOT(show_shortcuts_dialog()));
 
     //from spyder.app import tour
     // this->tour = tour.AnimatedTour(self)
@@ -541,13 +541,13 @@ void MainWindow::setup()
 
     QAction* about_action = new QAction("About Spyder...", this);
     about_action->setIcon(ima::icon("MessageBoxInformation"));
-    connect(about_action, SIGNAL(triggered(bool)), SLOT(about()));
+    connect(about_action, SIGNAL(triggered()), SLOT(about()));
 
     this->help_menu_actions << nullptr << about_action;
 
     // 1057行
     mem_status = new MemoryStatus(this, status);
-
+    this->apply_statusbar_settings();
     //1061行到1076h行第三方插件不实现
 
     this->plugins_menu = new QMenu("Panes", this);
@@ -564,7 +564,7 @@ void MainWindow::setup()
             << nullptr;
     add_actions(view_menu, actions);
     show_toolbars_action = new QAction("Show toolbars", this);
-    connect(show_toolbars_action, SIGNAL(triggered(bool)), SLOT(show_toolbars()));
+    connect(show_toolbars_action, SIGNAL(triggered()), SLOT(show_toolbars()));
     show_toolbars_action->setShortcutContext(Qt::ApplicationShortcut);
     this->register_shortcut(show_toolbars_action, "_", "Show toolbars");
 
@@ -672,7 +672,7 @@ void MainWindow::post_visible_setup()
     //    this->console.toggle_view_action.setChecked(False)
     //    this->console.dockwidget.hide()
 
-    // 1237行到1257行需要实现
+    // 1237行到1246行需要实现
 
     if (!this->open_project.isEmpty()) {
         this->projects->open_project(this->open_project);
@@ -1088,15 +1088,15 @@ void MainWindow::quick_layout_set_menu()
     }
 
     ql_save = new QAction("Save current layout", this);
-    connect(ql_save, SIGNAL(triggered(bool)), SLOT(quick_layout_save()));
+    connect(ql_save, SIGNAL(triggered()), SLOT(quick_layout_save()));
     ql_save->setShortcutContext(Qt::ApplicationShortcut);
 
     ql_preferences = new QAction("Layout preferences", this);
-    connect(ql_preferences, SIGNAL(triggered(bool)), SLOT(quick_layout_settings()));
+    connect(ql_preferences, SIGNAL(triggered()), SLOT(quick_layout_settings()));
     ql_preferences->setShortcutContext(Qt::ApplicationShortcut);
 
     ql_reset = new QAction("Reset to spyder default", this);
-    connect(ql_reset, SIGNAL(triggered(bool)), SLOT(reset_window_layout()));
+    connect(ql_reset, SIGNAL(triggered()), SLOT(reset_window_layout()));
 
     this->register_shortcut(ql_save, "_", "Save current layout");
     this->register_shortcut(ql_preferences, "_", "Layout preferences");

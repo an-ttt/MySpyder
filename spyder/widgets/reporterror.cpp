@@ -268,7 +268,7 @@ SpyderErrorDialog::SpyderErrorDialog(QWidget* parent, bool is_report)
 
 void SpyderErrorDialog::_submit_to_github()
 {
-    qDebug()<<__FILE__<<__FUNCTION__<<"submit_to_github";
+    qDebug()<<__FILE__<<__FUNCTION__;
     // 该槽函数需要GithubBackend类
 
     // 该函数调用了MainWindow::report_issue(self, body=None,

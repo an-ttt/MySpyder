@@ -172,12 +172,6 @@ Editor::Editor(MainWindow *parent, bool ignore_last_opened_files)
     }
     this->update_cursorpos_actions();
     this->set_path();
-
-    /*QTimer* timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, [this](){foreach (FileInfo* finfo, this->get_current_editorstack()->data) {
-            qDebug() << finfo->editor->document()->isModified();
-        }});
-    timer->start(40000);*/
 }
 
 void Editor::set_projects(Projects *projects)
@@ -274,7 +268,7 @@ bool Editor::closing_plugin(bool cancelable)
 {
     QByteArray state = this->splitter->saveState();
     this->set_option("splitter_state", qbytearray_to_str(state));
-
+    QStringList filenames;
     EditorStack* editorstack = this->editorstacks[0];
 
     QString active_project_path;
@@ -283,7 +277,6 @@ bool Editor::closing_plugin(bool cancelable)
     if (active_project_path.isEmpty())
         this->set_open_filenames();
     else {
-        QStringList filenames;
         foreach (FileInfo* finfo, editorstack->data) {
             filenames.append(finfo->filename);
         }
@@ -323,13 +316,13 @@ QList<QAction*> Editor::get_plugin_actions()
 
     this->open_last_closed_action = new QAction("O&pen last closed", this);
     this->open_last_closed_action->setToolTip("Open last closed");
-    connect(open_last_closed_action, SIGNAL(triggered(bool)), this, SLOT(open_last_closed()));
+    connect(open_last_closed_action, SIGNAL(triggered()), this, SLOT(open_last_closed()));
     this->register_shortcut(open_last_closed_action, "Editor", "Open last closed");
 
     this->open_action = new QAction("&Open...", this);
     this->open_action->setIcon(ima::icon("fileopen"));
     this->open_action->setToolTip("Open file");
-    connect(open_action, SIGNAL(triggered(bool)), this, SLOT(load()));
+    connect(open_action, SIGNAL(triggered()), this, SLOT(load()));
     this->open_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(open_action, "Editor", "Open file", true);
 
@@ -348,14 +341,14 @@ QList<QAction*> Editor::get_plugin_actions()
     this->save_all_action = new QAction("Sav&e all", this);
     this->save_all_action->setIcon(ima::icon("save_all"));
     this->save_all_action->setToolTip("Save all files");
-    connect(save_all_action, SIGNAL(triggered(bool)), this, SLOT(save_all()));
+    connect(save_all_action, SIGNAL(triggered()), this, SLOT(save_all()));
     this->save_all_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(save_all_action, "Editor", "Save all", true);
 
     QAction* save_as_action = new QAction("Save &as...", this);
     save_as_action->setIcon(ima::icon("filesaveas"));
     save_as_action->setToolTip("Save current file as...");
-    connect(save_as_action, SIGNAL(triggered(bool)), this, SLOT(save_as()));
+    connect(save_as_action, SIGNAL(triggered()), this, SLOT(save_as()));
     save_as_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(save_as_action, "Editor", "Save As");
 
@@ -371,17 +364,17 @@ QList<QAction*> Editor::get_plugin_actions()
     this->print_action = new QAction("&Print...", this);
     this->print_action->setIcon(ima::icon("print"));
     this->print_action->setToolTip("Print current file...");
-    connect(print_action, SIGNAL(triggered(bool)), this, SLOT(print_file()));
+    connect(print_action, SIGNAL(triggered()), this, SLOT(print_file()));
 
     this->close_action = new QAction("&Close", this);
     this->close_action->setIcon(ima::icon("fileclose"));
     this->close_action->setToolTip("Close current file");
-    connect(close_action, SIGNAL(triggered(bool)), this, SLOT(close_file()));
+    connect(close_action, SIGNAL(triggered()), this, SLOT(close_file()));
 
     this->close_all_action = new QAction("C&lose all", this);
     this->close_all_action->setIcon(ima::icon("filecloseall"));
     this->close_all_action->setToolTip("Close all opened files");
-    connect(close_all_action, SIGNAL(triggered(bool)), this, SLOT(close_all_files()));
+    connect(close_all_action, SIGNAL(triggered()), this, SLOT(close_all_files()));
     this->close_all_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(close_all_action, "Editor", "Close all");
 
@@ -390,19 +383,19 @@ QList<QAction*> Editor::get_plugin_actions()
     QAction* find_action = new QAction(_text, this);
     find_action->setIcon(ima::icon("find"));
     find_action->setToolTip(_text);
-    connect(find_action, SIGNAL(triggered(bool)), this, SLOT(find()));
+    connect(find_action, SIGNAL(triggered()), this, SLOT(find()));
     find_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(find_action, "_", "Find text", true);
 
     QAction* find_next_action = new QAction("Find &next", this);
     find_next_action->setIcon(ima::icon("findnext"));
-    connect(find_next_action, SIGNAL(triggered(bool)), this, SLOT(find_next()));
+    connect(find_next_action, SIGNAL(triggered()), this, SLOT(find_next()));
     find_next_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(find_next_action, "_", "Find next");
 
     QAction* find_previous_action = new QAction("Find &previous", this);
     find_previous_action->setIcon(ima::icon("findprevious"));
-    connect(find_previous_action, SIGNAL(triggered(bool)), this, SLOT(find_previous()));
+    connect(find_previous_action, SIGNAL(triggered()), this, SLOT(find_previous()));
     find_previous_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(find_previous_action, "_", "Find previous");
 
@@ -410,35 +403,35 @@ QList<QAction*> Editor::get_plugin_actions()
     QAction* replace_action = new QAction(_text, this);
     replace_action->setIcon(ima::icon("replace"));
     replace_action->setToolTip(_text);
-    connect(replace_action, SIGNAL(triggered(bool)), this, SLOT(replace()));
+    connect(replace_action, SIGNAL(triggered()), this, SLOT(replace()));
     replace_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(replace_action, "_", "Replace text");
 
     // ---- Debug menu and toolbar ----
     QAction* set_clear_breakpoint_action = new QAction("Set/Clear breakpoint", this);
     set_clear_breakpoint_action->setIcon(ima::icon("breakpoint_big"));
-    connect(set_clear_breakpoint_action, SIGNAL(triggered(bool)), this, SLOT(set_or_clear_breakpoint()));
+    connect(set_clear_breakpoint_action, SIGNAL(triggered()), this, SLOT(set_or_clear_breakpoint()));
     set_clear_breakpoint_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(set_clear_breakpoint_action, "Editor", "Breakpoint");
 
     QAction* set_cond_breakpoint_action = new QAction("Set/Edit conditional breakpoint", this);
     set_cond_breakpoint_action->setIcon(ima::icon("breakpoint_cond_big"));
-    connect(set_cond_breakpoint_action, SIGNAL(triggered(bool)), this, SLOT(set_or_edit_conditional_breakpoint()));
+    connect(set_cond_breakpoint_action, SIGNAL(triggered()), this, SLOT(set_or_edit_conditional_breakpoint()));
     set_cond_breakpoint_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(set_cond_breakpoint_action, "Editor", "Conditional breakpoint");
 
     QAction* clear_all_breakpoints_action = new QAction("Clear breakpoints in all files", this);
-    connect(clear_all_breakpoints_action, SIGNAL(triggered(bool)), this, SLOT(clear_all_breakpoints()));
+    connect(clear_all_breakpoints_action, SIGNAL(triggered()), this, SLOT(clear_all_breakpoints()));
 
     this->winpdb_action = new QAction("Debug with winpdb", this);
-    connect(winpdb_action, SIGNAL(triggered(bool)), this, SLOT(run_winpdb()));
+    connect(winpdb_action, SIGNAL(triggered()), this, SLOT(run_winpdb()));
     this->winpdb_action->setEnabled(false);
 
     // --- Debug toolbar ---
     QAction* debug_action = new QAction("&Debug", this);
     debug_action->setIcon(ima::icon("debug"));
     debug_action->setToolTip("Debug file");
-    connect(debug_action, SIGNAL(triggered(bool)), this, SLOT(debug_file()));
+    connect(debug_action, SIGNAL(triggered()), this, SLOT(debug_file()));
     this->register_shortcut(debug_action, "_", "Debug", true);
 
     QAction* debug_next_action = new QAction("Step", this);
@@ -482,18 +475,18 @@ QList<QAction*> Editor::get_plugin_actions()
     configure_action->setIcon(ima::icon("run_settings"));
     configure_action->setToolTip("Run settings");
     configure_action->setMenuRole(QAction::NoRole);
-    connect(configure_action, SIGNAL(triggered(bool)), this, SLOT(edit_run_configurations()));
+    connect(configure_action, SIGNAL(triggered()), this, SLOT(edit_run_configurations()));
     this->register_shortcut(configure_action, "_", "Configure", true);
 
     QAction* re_run_action = new QAction("Re-run &last script", this);
     re_run_action->setToolTip("Run again last file");
-    connect(re_run_action, SIGNAL(triggered(bool)), this, SLOT(re_run_file()));
+    connect(re_run_action, SIGNAL(triggered()), this, SLOT(re_run_file()));
     this->register_shortcut(re_run_action, "_", "Re-run last script", true);
 
     QAction* run_selected_action = new QAction("Run &selection or current line", this);
     run_selected_action->setIcon(ima::icon("run_selection"));
     run_selected_action->setToolTip("Run selection or current line");
-    connect(run_selected_action, SIGNAL(triggered(bool)), this, SLOT(run_selection()));
+    connect(run_selected_action, SIGNAL(triggered()), this, SLOT(run_selection()));
     this->register_shortcut(re_run_action, "Editor", "Run selection", true);
 
     QAction* run_cell_action = new QAction("Run cell", this);
@@ -501,7 +494,7 @@ QList<QAction*> Editor::get_plugin_actions()
     run_cell_action->setShortcut(QKeySequence("Ctrl+Return"));
     run_cell_action->setToolTip("Run current cell (Ctrl+Enter)\n"
                                 "[Use #%% to create cells]");
-    connect(run_cell_action, SIGNAL(triggered(bool)), this, SLOT(run_cell()));
+    connect(run_cell_action, SIGNAL(triggered()), this, SLOT(run_cell()));
     run_cell_action->setShortcutContext(Qt::WidgetShortcut);
 
     QAction* run_cell_advance_action = new QAction("Run cell and advance", this);
@@ -509,12 +502,12 @@ QList<QAction*> Editor::get_plugin_actions()
     run_cell_advance_action->setShortcut(QKeySequence("Shift+Return"));
     run_cell_advance_action->setToolTip("Run current cell and go to the next one "
                                 "(Shift+Enter)");
-    connect(run_cell_advance_action, SIGNAL(triggered(bool)), this, SLOT(run_cell_and_advance()));
+    connect(run_cell_advance_action, SIGNAL(triggered()), this, SLOT(run_cell_and_advance()));
     run_cell_advance_action->setShortcutContext(Qt::WidgetShortcut);
 
     QAction* re_run_last_cell_action = new QAction("Re-run last cell", this);
     re_run_last_cell_action->setToolTip("Re run last cell ");
-    connect(re_run_last_cell_action, SIGNAL(triggered(bool)), this, SLOT(re_run_last_cell()));
+    connect(re_run_last_cell_action, SIGNAL(triggered()), this, SLOT(re_run_last_cell()));
     re_run_last_cell_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(re_run_last_cell_action, "Editor", "re-run last cell", true);
 
@@ -523,7 +516,7 @@ QList<QAction*> Editor::get_plugin_actions()
     this->todo_list_action->setIcon(ima::icon("todo_list"));
     this->todo_list_action->setToolTip("Show comments list (TODO/FIXME/XXX/HINT/TIP/@todo/"
                                        "HACK/BUG/OPTIMIZE/!!!/?? ?)");
-    connect(todo_list_action, SIGNAL(triggered(bool)), this, SLOT(go_to_next_todo()));
+    connect(todo_list_action, SIGNAL(triggered()), this, SLOT(go_to_next_todo()));
 
     this->todo_menu = new QMenu(this);
     this->todo_list_action->setMenu(this->todo_menu);
@@ -532,40 +525,40 @@ QList<QAction*> Editor::get_plugin_actions()
     this->warning_list_action = new QAction("Show warning/error list", this);
     this->warning_list_action->setIcon(ima::icon("wng_list"));
     this->warning_list_action->setToolTip("Show code analysis warnings/errors");
-    connect(warning_list_action, SIGNAL(triggered(bool)), this, SLOT(go_to_next_warning()));
+    connect(warning_list_action, SIGNAL(triggered()), this, SLOT(go_to_next_warning()));
 
     this->warning_menu = new QMenu(this);
     this->warning_list_action->setMenu(this->warning_menu);
-    connect(todo_menu, SIGNAL(aboutToShow()), this, SLOT(update_warning_menu()));
+    connect(warning_menu, SIGNAL(aboutToShow()), this, SLOT(update_warning_menu()));
 
     this->previous_warning_action = new QAction("Previous warning/error", this);
     this->previous_warning_action->setIcon(ima::icon("prev_wng"));
     this->previous_warning_action->setToolTip("Go to previous code analysis warning/error");
-    connect(previous_warning_action, SIGNAL(triggered(bool)), this, SLOT(go_to_previous_warning()));
+    connect(previous_warning_action, SIGNAL(triggered()), this, SLOT(go_to_previous_warning()));
 
     this->next_warning_action = new QAction("Next warning/error", this);
     this->next_warning_action->setIcon(ima::icon("next_wng"));
     this->next_warning_action->setToolTip("Go to next code analysis warning/error");
-    connect(next_warning_action, SIGNAL(triggered(bool)), this, SLOT(go_to_next_warning()));
+    connect(next_warning_action, SIGNAL(triggered()), this, SLOT(go_to_next_warning()));
 
     this->previous_edit_cursor_action = new QAction("Last edit location", this);
     this->previous_edit_cursor_action->setIcon(ima::icon("last_edit_location"));
     this->previous_edit_cursor_action->setToolTip("Go to last edit location");
-    connect(previous_edit_cursor_action, SIGNAL(triggered(bool)), this, SLOT(go_to_last_edit_location()));
+    connect(previous_edit_cursor_action, SIGNAL(triggered()), this, SLOT(go_to_last_edit_location()));
     this->previous_edit_cursor_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(previous_edit_cursor_action, "Editor", "Last edit location", true);
 
     this->previous_cursor_action = new QAction("Previous cursor position", this);
     this->previous_cursor_action->setIcon(ima::icon("prev_cursor"));
     this->previous_cursor_action->setToolTip("Go to previous cursor position");
-    connect(previous_cursor_action, SIGNAL(triggered(bool)), this, SLOT(go_to_previous_cursor_position()));
+    connect(previous_cursor_action, SIGNAL(triggered()), this, SLOT(go_to_previous_cursor_position()));
     this->previous_cursor_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(previous_cursor_action, "Editor", "Previous cursor position", true);
 
     this->next_cursor_action = new QAction("Next cursor position", this);
     this->next_cursor_action->setIcon(ima::icon("next_cursor"));
     this->next_cursor_action->setToolTip("Go to next cursor position");
-    connect(next_cursor_action, SIGNAL(triggered(bool)), this, SLOT(go_to_next_cursor_position()));
+    connect(next_cursor_action, SIGNAL(triggered()), this, SLOT(go_to_next_cursor_position()));
     this->next_cursor_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(next_cursor_action, "Editor", "Next cursor position", true);
 
@@ -573,19 +566,19 @@ QList<QAction*> Editor::get_plugin_actions()
     this->toggle_comment_action = new QAction("Comment/Uncomment", this);
     this->toggle_comment_action->setIcon(ima::icon("comment"));
     this->toggle_comment_action->setToolTip("Comment current line or selection");
-    connect(toggle_comment_action, SIGNAL(triggered(bool)), this, SLOT(toggle_comment()));
+    connect(toggle_comment_action, SIGNAL(triggered()), this, SLOT(toggle_comment()));
     this->toggle_comment_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(toggle_comment_action, "Editor", "Toggle comment");
 
     QAction* blockcomment_action = new QAction("Add &block comment", this);
     blockcomment_action->setToolTip("Add block comment around current line or selection");
-    connect(blockcomment_action, SIGNAL(triggered(bool)), this, SLOT(blockcomment()));
+    connect(blockcomment_action, SIGNAL(triggered()), this, SLOT(blockcomment()));
     blockcomment_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(blockcomment_action, "Editor", "Blockcomment");
 
     QAction* unblockcomment_action = new QAction("R&emove block comment", this);
     unblockcomment_action->setToolTip("Remove comment block around current line or selection");
-    connect(unblockcomment_action, SIGNAL(triggered(bool)), this, SLOT(unblockcomment()));
+    connect(unblockcomment_action, SIGNAL(triggered()), this, SLOT(unblockcomment()));
     unblockcomment_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(unblockcomment_action, "Editor", "UnBlockcomment");
 
@@ -594,24 +587,24 @@ QList<QAction*> Editor::get_plugin_actions()
     //this->indent_action->setShortcut("Tab");   //注意这里
     this->indent_action->setIcon(ima::icon("indent"));
     this->indent_action->setToolTip("Indent current line or selection");
-    connect(indent_action, SIGNAL(triggered(bool)), this, SLOT(indent()));
+    connect(indent_action, SIGNAL(triggered()), this, SLOT(indent()));
     this->indent_action->setShortcutContext(Qt::WidgetShortcut);
 
     this->unindent_action = new QAction("Unindent", this);
     this->unindent_action->setIcon(ima::icon("unindent"));
     this->unindent_action->setToolTip("Unindent current line or selection");
-    connect(unindent_action, SIGNAL(triggered(bool)), this, SLOT(unindent()));
+    connect(unindent_action, SIGNAL(triggered()), this, SLOT(unindent()));
     this->unindent_action->setShortcutContext(Qt::WidgetShortcut);
 
     this->text_uppercase_action = new QAction("Toggle Uppercase", this);
     this->text_uppercase_action->setToolTip("Change to uppercase current line or selection");
-    connect(text_uppercase_action, SIGNAL(triggered(bool)), this, SLOT(text_uppercase()));
+    connect(text_uppercase_action, SIGNAL(triggered()), this, SLOT(text_uppercase()));
     this->text_uppercase_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(text_uppercase_action, "Editor", "transform to uppercase");
 
     this->text_lowercase_action = new QAction("Toggle Lowercase", this);
     this->text_lowercase_action->setToolTip("Change to lowercase current line or selection");
-    connect(text_lowercase_action, SIGNAL(triggered(bool)), this, SLOT(text_lowercase()));
+    connect(text_lowercase_action, SIGNAL(triggered()), this, SLOT(text_lowercase()));
     this->text_lowercase_action->setShortcutContext(Qt::WidgetShortcut);
     this->register_shortcut(text_lowercase_action, "Editor", "transform to lowercase");
 
@@ -639,16 +632,16 @@ QList<QAction*> Editor::get_plugin_actions()
     add_actions(eol_menu, eol_actions);
 
     QAction* trailingspaces_action = new QAction("Remove trailing spaces", this);
-    connect(trailingspaces_action, SIGNAL(triggered(bool)), this, SLOT(remove_trailing_spaces()));
+    connect(trailingspaces_action, SIGNAL(triggered()), this, SLOT(remove_trailing_spaces()));
 
     this->showblanks_action = new QAction("Show blank spaces", this);
     // 下面这个连接好像会产生bug
-    //connect(showblanks_action, SIGNAL(toggled(bool)), this, SLOT(toggle_show_blanks(bool)));
-    //showblanks_action->setCheckable(true);
+    connect(showblanks_action, SIGNAL(toggled(bool)), this, SLOT(toggle_show_blanks(bool)));
+    showblanks_action->setCheckable(true);
 
     QAction* fixindentation_action = new QAction("Fix indentation", this);
     fixindentation_action->setToolTip("Replace tab characters by space characters");
-    connect(fixindentation_action, SIGNAL(triggered(bool)), this, SLOT(fix_indentation()));
+    connect(fixindentation_action, SIGNAL(triggered()), this, SLOT(fix_indentation()));
 
     QAction* gotoline_action = new QAction("Go to line...", this);
     gotoline_action->setIcon(ima::icon("gotoline"));
@@ -660,14 +653,14 @@ QList<QAction*> Editor::get_plugin_actions()
     workdir_action->setIcon(ima::icon("DirOpenIcon"));
     workdir_action->setToolTip("Set current console (and file explorer) working "
                                "directory to current script directory");
-    connect(workdir_action, SIGNAL(triggered(bool)), this, SLOT(__set_workdir()));
+    connect(workdir_action, SIGNAL(triggered()), this, SLOT(__set_workdir()));
 
     this->max_recent_action = new QAction("Maximum number of recent files...", this);
-    connect(max_recent_action, SIGNAL(triggered(bool)), this, SLOT(change_max_recent_files()));
+    connect(max_recent_action, SIGNAL(triggered()), this, SLOT(change_max_recent_files()));
 
     this->clear_recent_action = new QAction("Clear this list", this);
     this->clear_recent_action->setToolTip("Clear recent files list");
-    connect(clear_recent_action, SIGNAL(triggered(bool)), this, SLOT(clear_recent_files()));
+    connect(clear_recent_action, SIGNAL(triggered()), this, SLOT(clear_recent_files()));
 
     // ---- File menu/toolbar construction ----
     this->recent_file_menu = new QMenu("Open &recent", this);
@@ -812,7 +805,6 @@ QList<QAction*> Editor::get_plugin_actions()
 
 void Editor::register_plugin()
 {
-
     connect(this->main, SIGNAL(restore_scrollbar_position()),
             this, SLOT(restore_scrollbar_position()));
     // main.console.edit_goto.connect(self.load)
@@ -1268,29 +1260,76 @@ void Editor::refresh_save_all_action()
 
 void Editor::update_warning_menu()
 {
-    // 需要EditorStack实现get_analysis_results()方法
+    EditorStack* editorstack = this->get_current_editorstack();
+    QList<QList<QVariant>> check_results = editorstack->get_analysis_results();
+    this->warning_menu->clear();
+    QString filename = this->get_current_filename();
+    foreach (auto pair, check_results) {
+        QString message = pair[0].toString();
+        int line_number = pair[1].toInt();
+        bool error = message.contains("syntax");
+        QString text = message.left(1).toUpper() + message.mid(1);
+        QIcon icon = error ? ima::icon("error") : ima::icon("warning");
+
+        auto slot_fun = [=](){this->switch_to_plugin();this->load(filename, line_number);};
+        QAction* action = new QAction(icon, text, this);
+        connect(action, &QAction::triggered, slot_fun);
+        this->warning_menu->addAction(action);
+    }
 }
 
 void Editor::analysis_results_changed()
 {
-    // 需要EditorStack实现get_analysis_results()方法
+    EditorStack* editorstack = this->get_current_editorstack();
+    QList<QList<QVariant>> results = editorstack->get_analysis_results();
+    int index = editorstack->get_stack_index();
+    if (index != -1) {
+        QString filename = editorstack->data[index]->filename;
+        foreach (EditorStack* other_editorstack, this->editorstacks) {
+            if (other_editorstack != editorstack)
+                other_editorstack->set_analysis_results(filename, results);
+        }
+    }
     this->update_code_analysis_actions();
 }
 
 void Editor::update_todo_menu()
 {
-    // 需要EditorStack实现get_todo_results()方法
+    EditorStack* editorstack = this->get_current_editorstack();
+    QList<QList<QVariant>> results = editorstack->get_todo_results();
+    this->todo_menu->clear();
+    QString filename = this->get_current_filename();
+    foreach (auto pair, results) {
+        QString text = pair[0].toString();
+        int line0 = pair[1].toInt();
+        QIcon icon = ima::icon("todo");
+
+        auto slot_fun = [=](){this->switch_to_plugin();this->load(filename, line0);};
+        QAction* action = new QAction(icon, text, this);
+        connect(action, &QAction::triggered, slot_fun);
+        this->todo_menu->addAction(action);
+    }
     this->update_todo_actions();
 }
 
 void Editor::todo_results_changed()
 {
-    // 需要EditorStack实现get_todo_results()方法
+    EditorStack* editorstack = this->get_current_editorstack();
+    QList<QList<QVariant>> results = editorstack->get_todo_results();
+    int index = editorstack->get_stack_index();
+    if (index != -1) {
+        QString filename = editorstack->data[index]->filename;
+        foreach (EditorStack* other_editorstack, this->editorstacks) {
+            if (other_editorstack != editorstack)
+                other_editorstack->set_todo_results(filename, results);
+        }
+    }
     this->update_todo_actions();
 }
 
 void Editor::refresh_eol_chars(const QString &os_name)
 {
+    this->__set_eol_chars = false;
     if (os_name == "nt")
         this->win_eol_action->setChecked(true);
     else if (os_name == "posix")
@@ -1326,10 +1365,25 @@ void Editor::opened_files_list_changed()
 }
 
 void Editor::update_code_analysis_actions()
-{}
+{
+    EditorStack* editorstack = this->get_current_editorstack();
+    QList<QList<QVariant>> results = editorstack->get_analysis_results();
+    bool state = (this->get_option("code_analysis/pyflakes").toBool()
+            || this->get_option("code_analysis/pep8").toBool())
+            && !results.isEmpty();
+    this->warning_list_action->setEnabled(state);
+    this->previous_warning_action->setEnabled(state);
+    this->next_warning_action->setEnabled(state);
+}
 
 void Editor::update_todo_actions()
-{}
+{
+    EditorStack* editorstack = this->get_current_editorstack();
+    QList<QList<QVariant>> results = editorstack->get_todo_results();
+    bool state = this->get_option("todo_list").toBool()
+            && !results.isEmpty();
+    this->todo_list_action->setEnabled(state);
+}
 
 void Editor::rehighlight_cells()
 {
@@ -1496,7 +1550,7 @@ void Editor::update_recent_file_menu()
     QStringList recent_files;
     foreach (QString fname, this->recent_files) {
         QFileInfo info(fname);
-        if (this->is_file_opened(fname) > -1 && info.isFile())
+        if (this->is_file_opened(fname) == -1 && info.isFile())
             recent_files.append(fname);
     }
     this->recent_file_menu->clear();
@@ -1504,7 +1558,7 @@ void Editor::update_recent_file_menu()
         foreach (QString fname, recent_files) {
             QAction* action = new QAction(fname, this);
             action->setIcon(ima::icon("FileIcon"));
-            connect(action, SIGNAL(triggered(bool)), this, SLOT(load()));
+            connect(action, SIGNAL(triggered()), this, SLOT(load()));
             action->setData(fname);
             this->recent_file_menu->addAction(action);
         }
@@ -1595,7 +1649,7 @@ void Editor::load()
         if (filenames.isEmpty())
             return;
     }
-qDebug() << filenames;
+
     QWidget* focus_widget = QApplication::focusWidget();
     CodeEditor* code_editor = qobject_cast<CodeEditor*>(focus_widget);
     EditorMainWindow* editorwindow = nullptr;
@@ -2321,6 +2375,8 @@ void Editor::run_file(bool debug)
             }
             else
                 show_dlg = CONF_get("run", ALWAYS_OPEN_FIRST_RUN_OPTION).toBool();
+            if (show_dlg && !dialog->exec())
+                return;
             runconf = dialog->get_configuration();
         }
 
@@ -2355,35 +2411,6 @@ void Editor::run_file(bool debug)
             editor->setFocus();
     }
 }
-
-/*
-void Editor::run_file(bool debug)
-{
-    EditorStack* editorstack = this->get_current_editorstack();
-    if (editorstack->save()) {
-        CodeEditor* editor = this->get_current_editor();
-        QFileInfo info(this->get_current_filename());
-
-        QString fname = info.absoluteFilePath();
-        QString dirname = info.absolutePath();
-
-        QString args;
-        bool interact = false;
-        bool debug = false;
-        bool python = true; //
-        QString python_args;
-        bool current = false;
-        bool systerm = false; //
-        bool post_mortem = false;
-        bool clear_namespace = false;
-
-        this->__last_ec_exec = Last_Ec_Exec(fname, dirname, args, interact, debug,
-                                            python, python_args, current, systerm,
-                                            post_mortem, clear_namespace);
-        this->re_run_file();
-
-    }
-}*/
 
 void Editor::set_dialog_size(const QSize &size)
 {
@@ -2425,8 +2452,8 @@ void Editor::re_run_file()
     }
     else {
         this->main->open_external_console(fname, wdir, args, interact,
-                                      debug, python, python_args,
-                                      systerm, post_mortem);
+                                          debug, python, python_args,
+                                          systerm, post_mortem);
     }
 }
 
@@ -2559,4 +2586,3 @@ void Editor::set_create_new_file_if_empty(bool value)
     }
 }
 
-//在File explorer点击.h .cpp文件会导致QList<T>::operator[]: "index out of range"
