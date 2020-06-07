@@ -43,7 +43,12 @@ int main(int argc, char *argv[])
 {
     registe_meta_type();
     QApplication a(argc, argv);
-    //read_default_to_settings();
+    QSettings settings;
+    QString first_run = "first_run";
+    if (settings.value(first_run, true).toBool()) {
+        read_default_to_settings();
+        settings.setValue(first_run, false);
+    }
     initialize();
 
     MainWindow* win = new MainWindow;

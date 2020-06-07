@@ -183,26 +183,6 @@ MainWindow::MainWindow(const QHash<QString,QVariant>& options)
     this->last_focused_widget = nullptr;
     this->previous_focused_widget = nullptr;
 
-    if (os::name == "nt") {
-        WSADATA wsd;
-        if (WSAStartup(MAKEWORD(2, 2), &wsd) != 0)
-        {
-            WSACleanup();
-            return;
-        };
-        this->open_files_server = socket(AF_INET,
-                                         SOCK_STREAM,
-                                         IPPROTO_TCP);
-        if (open_files_server == INVALID_SOCKET)
-            QMessageBox::warning(nullptr, "Spyder",
-                                 "An error occurred while creating a socket needed "
-                                 "by Spyder. Please, try to run as an Administrator "
-                                 "from cmd.exe the following command and then "
-                                 "restart your computer: <br><br><span "
-                                 "style=\'color: #555555\'><b>netsh winsock reset"
-                                 "</b></span><br>");
-    }
-
     this->apply_settings();
     qDebug() << "End of MainWindow constructor";
 }
@@ -647,18 +627,6 @@ void MainWindow::post_visible_setup()
         widget->setFloating(true);
     }
 
-    if (CONF_get("main", "single_instance").toBool() && !this->new_instance
-            && open_files_server != INVALID_SOCKET) {
-        // t = threading.Thread(target=this->start_open_files_server)
-        // t.setDaemon(True) // setDaemon(True)设置为守护线程，随着主线程的结束而结束
-        // t.start()
-
-        std::thread t([this](){this->start_open_files_server();});
-        t.detach();
-
-        connect(this, SIGNAL(sig_open_external_file(QString)), SLOT(open_external_file(QString)));
-    }
-
     this->create_plugins_menu();
     this->create_toolbars_menu();
 
@@ -784,8 +752,18 @@ void MainWindow::set_window_settings(QString hexstate, QSize window_size, QSize 
     this->move(this->window_position);
 
     if (!hexstate.isEmpty()) {
-        // !!!当添加新控件时，位置不对，可以先禁用这里
-        this->restoreState(QByteArray::fromHex(hexstate.toUtf8()));
+        QSettings settings;
+        QString run_count = "run_count";
+        if (settings.value(run_count, 0).toInt() == 0) {
+            settings.setValue(run_count, 1);
+        }
+        else if (settings.value(run_count).toInt() == 1) {
+            settings.setValue(run_count, 2);
+        }
+        else {
+            // !!!当添加新控件时，位置不对，可以先禁用这里
+            this->restoreState(QByteArray::fromHex(hexstate.toUtf8()));
+        }
         foreach (QObject* obj, this->children()) {
             QDockWidget* widget = qobject_cast<QDockWidget*>(obj);
             if (widget && widget->isFloating()) {
@@ -1550,10 +1528,6 @@ bool MainWindow::closing(bool cancelable)
     }
     QString prefix = "window/";
     this->save_current_window_settings(prefix);
-    if (CONF_get("main", "single_instance").toBool() && open_files_server != INVALID_SOCKET) {
-        closesocket(open_files_server);
-        WSACleanup();
-    }
 
     foreach (SpyderPluginMixin* plugin, this->thirdparty_plugins) {
         if (!plugin->closing_plugin(cancelable))
@@ -2224,38 +2198,6 @@ void MainWindow::show_shortcuts_dialog()
 void MainWindow::start_open_files_server()
 {
     qDebug() << __func__;
-    int optval = 1;
-    //SO_REUSEADDR设置端口复用
-    setsockopt(open_files_server, SOL_SOCKET,
-               SO_REUSEADDR, (const char *)&optval, sizeof (optval));
-    u_short port = misc::select_port(OPEN_FILES_PORT);
-    CONF_set("main", "open_files_port", port);
-
-    sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-
-    addr.sin_family = AF_INET;
-    addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(port);
-    bind(open_files_server, (sockaddr*)&addr, sizeof (addr));
-
-    listen(open_files_server, 20);
-    while (1) {
-        sockaddr_in remote_addr;
-        int len;
-        SOCKET req = accept(open_files_server, (sockaddr*)&remote_addr, &len);
-        if (req == INVALID_SOCKET) {
-            //总是在这里返回，TODO没有实现远程在spyder打开文件的功能
-            //可能是因为多线程的原因
-            return;
-        }
-        char buff[1024] = { 0 };
-        recv(req, buff, 1024, 0);
-        QString fname = buff;
-        emit sig_open_external_file(fname);
-        const char* msg = " ";
-        send(req, msg, 2, 0);
-    }
 }
 
 void MainWindow::reset_spyder()

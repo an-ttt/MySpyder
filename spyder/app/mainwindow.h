@@ -1,6 +1,5 @@
 #pragma once
 
-#include <thread>
 #include <QtWidgets>
 #include "config/utils.h"
 #include "plugins/history.h"
@@ -183,8 +182,6 @@ public:
 
     QWidget* last_focused_widget;
     QWidget* previous_focused_widget;
-
-    SOCKET open_files_server;//519行
 
     QAction* toggle_next_layout_action;//568行
     QAction* toggle_previous_layout_action;
